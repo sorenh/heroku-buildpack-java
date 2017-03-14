@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # bin/release <build-dir>
 
+set -x
+
 BUILD_DIR=$1
 
 is_spring_boot() {
