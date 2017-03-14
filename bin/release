@@ -45,12 +45,12 @@ if [ ! -f $BUILD_DIR/Procfile ] && [ -d $BUILD_DIR/target ]; then
     elif is_wildfly_swarm $BUILD_DIR; then
       echo "default_process_types:" >> releasefile
       echo "  web: java -Dswarm.http.port=\$PORT \$JAVA_OPTS -jar $jarFile" >> releasefile
-    else
-      echo "default_process_types:" >> releasefile
-      echo "  web: java -Dserver.port=\$PORT \$JAVA_OPTS -jar $jarFile" >> releasefile
     fi
     break;
   done
+else
+  echo "default_process_types:" >> releasefile
+  echo "  web: java -Dserver.port=\$PORT \$JAVA_OPTS -jar $jarFile" >> releasefile
 fi
 
 grep '' releasefile /dev/null >&2
