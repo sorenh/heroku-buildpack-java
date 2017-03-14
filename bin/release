@@ -2,6 +2,7 @@
 # bin/release <build-dir>
 
 set -x
+touch releasefile
 
 BUILD_DIR=$1
 
@@ -26,8 +27,10 @@ has_postgres() {
     test -n "$(grep "<groupId>com.impossibl.pgjdbc-ng" ${buildDir}/pom.xml)")
 }
 
+echo "---" > releasefile
+
 if has_postgres $BUILD_DIR; then
-  cat <<EOF
+  cat <<EOF >> releasefile
 addons:
   - heroku-postgresql
 EOF
@@ -37,12 +40,16 @@ if [ ! -f $BUILD_DIR/Procfile ] && [ -d $BUILD_DIR/target ]; then
   cd $BUILD_DIR
   for jarFile in $(find target -maxdepth 1 -name "*.jar" -type f); do
     if is_spring_boot $BUILD_DIR; then
-      echo "default_process_types:"
-      echo "  web: java -Dserver.port=\$PORT \$JAVA_OPTS -jar $jarFile"
+      echo "default_process_types:" >> releasefile
+      echo "  web: java -Dserver.port=\$PORT \$JAVA_OPTS -jar $jarFile" >> releasefile
     elif is_wildfly_swarm $BUILD_DIR; then
-      echo "default_process_types:"
-      echo "  web: java -Dswarm.http.port=\$PORT \$JAVA_OPTS -jar $jarFile"
+      echo "default_process_types:" >> releasefile
+      echo "  web: java -Dswarm.http.port=\$PORT \$JAVA_OPTS -jar $jarFile" >> releasefile
     fi
     break;
   done
 fi
+
+grep '' releasefile /dev/null >&2
+
+cat releasefile
